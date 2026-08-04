@@ -78,3 +78,27 @@ def interview_prep(request: InterviewPrepRequest):
         request.experience_level,
         request.skills
     )
+
+from interviewcoach.services.knowledge_service import (
+    load_role_knowledge,
+    extract_skills
+)
+
+
+@app.get("/debug/skills/{role}")
+def debug_skills(role: str):
+
+    knowledge = load_role_knowledge(role)
+
+    return {
+        "skills": extract_skills(knowledge)
+    }
+
+@app.get("/debug/knowledge/{role}")
+def debug_knowledge(role: str):
+
+    knowledge = load_role_knowledge(role)
+
+    return {
+        "content": knowledge
+    }
