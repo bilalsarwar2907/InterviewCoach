@@ -2,7 +2,9 @@ from pathlib import Path
 
 
 def load_role_knowledge(role: str) -> str:
+
     role_map = {
+        "Ai Engineer": "ai-engineer",
         "AI Engineer": "ai-engineer",
         "Cloud Engineer": "cloud-engineer",
         "Data Engineer": "data-engineer",
@@ -18,11 +20,13 @@ def load_role_knowledge(role: str) -> str:
 
     content = []
 
-    if knowledge_path.exists():
-        for file in knowledge_path.glob("*.*"):
-            try:
-                content.append(file.read_text(encoding="utf-8"))
-            except Exception:
-                pass
+    if not knowledge_path.exists():
+        return ""
 
-    return "\n".join(content)
+    for file in knowledge_path.glob("*.md"):
+        try:
+            content.append(file.read_text(encoding="utf-8"))
+        except Exception as ex:
+            content.append(f"ERROR: {file.name} - {str(ex)}")
+
+    return "\n\n".join(content)
