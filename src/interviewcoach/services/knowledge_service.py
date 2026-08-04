@@ -1,18 +1,16 @@
 from pathlib import Path
 
+def get_role_folder(role: str) -> str:
+    return (
+        role.lower()
+        .replace("_", "-")
+        .replace(" ", "-")
+    )
+
 
 def load_role_knowledge(role: str) -> str:
 
-    role_map = {
-        "Ai Engineer": "ai-engineer",
-        "AI Engineer": "ai-engineer",
-        "Cloud Engineer": "cloud-engineer",
-        "Data Engineer": "data-engineer",
-        "Python Developer": "python",
-    }
-
-    folder = role_map.get(role)
-
+    folder = get_role_folder(role)
     if not folder:
         return ""
 
