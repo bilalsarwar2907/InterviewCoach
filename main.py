@@ -12,6 +12,8 @@ from interviewcoach.models.skill_gap_request import SkillGapRequest
 from interviewcoach.services.skill_gap_service import analyze_skill_gap
 from interviewcoach.models.study_plan_request import StudyPlanRequest
 from interviewcoach.services.study_plan_service import generate_study_plan
+from interviewcoach.models.interview_prep_request import InterviewPrepRequest
+from interviewcoach.services.interview_prep_service import generate_interview_prep
 
 app = FastAPI(title="InterviewCoach")
 
@@ -66,4 +68,13 @@ def study_plan(request: StudyPlanRequest):
     return generate_study_plan(
         request.role,
         request.missing_skills
+    )
+
+@app.post("/interview-prep")
+def interview_prep(request: InterviewPrepRequest):
+
+    return generate_interview_prep(
+        request.role,
+        request.experience_level,
+        request.skills
     )
