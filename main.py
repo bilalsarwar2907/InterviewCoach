@@ -14,8 +14,32 @@ from interviewcoach.models.study_plan_request import StudyPlanRequest
 from interviewcoach.services.study_plan_service import generate_study_plan
 from interviewcoach.models.interview_prep_request import InterviewPrepRequest
 from interviewcoach.services.interview_prep_service import generate_interview_prep
+from interviewcoach.models.study_plan_from_skills_request import (
+    StudyPlanFromSkillsRequest
+)
 
-app = FastAPI(title="InterviewCoach")
+from interviewcoach.services.study_plan_service import (
+    generate_study_plan_from_skills
+)
+from fastapi.middleware.cors import CORSMiddleware
+
+app = FastAPI(
+    title="InterviewCoach",
+    version="0.1.0",
+    servers=[
+        {
+            "url": "https://protozoan-ripcord-flying.ngrok-free.dev"
+        }
+    ]
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 
 @app.get("/")
@@ -79,3 +103,21 @@ def interview_prep(request: InterviewPrepRequest):
         request.skills
     )
 
+@app.post("/study-plan-from-skills")
+def study_plan_from_skills(
+    request: StudyPlanFromSkillsRequest
+):
+
+    return generate_study_plan_from_skills(
+        request.role,
+        request.skills
+    )
+
+@app.get("/api-info")
+def api_info():
+    return {
+        "name": "InterviewCoach",
+        "version": "0.1.0",
+        "status": "ready",
+        "endpoint": "/interview-prep"
+    }

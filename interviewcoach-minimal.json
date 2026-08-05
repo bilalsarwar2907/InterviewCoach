@@ -1,0 +1,24 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "InterviewCoach",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://protozoan-ripcord-flying.ngrok-free.dev"
+    }
+  ],
+  "paths": {
+    "/api-info": {
+      "get": {
+        "operationId": "ApiInfo",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  }
+}

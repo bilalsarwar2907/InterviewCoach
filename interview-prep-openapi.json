@@ -1,0 +1,41 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "InterviewCoach",
+    "description": "Generate interview preparation plans including questions, skill gap analysis, and a study plan.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://protozoan-ripcord-flying.ngrok-free.dev"
+    }
+  ],
+  "paths": {
+    "/interview-prep": {
+      "post": {
+        "operationId": "GenerateInterviewPrep",
+        "summary": "Generate interview preparation plan",
+        "description": "Generates interview questions, skill gap analysis, and a study plan for a specified role.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["role", "experience_level", "skills"],
+                "properties": {
+                  "role": { "type": "string" },
+                  "experience_level": { "type": "string" },
+                  "skills": { "type": "array", "items": { "type": "string" } }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Interview preparation generated successfully" }
+        }
+      }
+    }
+  }
+}

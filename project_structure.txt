@@ -1,0 +1,81 @@
+Folder PATH listing for volume Windows
+Volume serial number is 000000C2 848A:212B
+C:.
+|   .gitignore
+|   export_openapi.py
+|   interview-prep-openapi.json
+|   interviewcoach-minimal.json
+|   main.py
+|   PROJECT.md
+|   project_structure.txt
+|   README.md
+|   requirements.txt
+|   
++---.github
+|   \---workflow
+|           python.yml
+|           
++---architecture
+|       architecture.md
+|       
++---docs
+|       business_problem.md
+|       solution.md
+|       
++---knowledge
+|   |   UPLOAD_CHECKLIST.md
+|   |   
+|   +---ai-engineer
+|   |       AI_Engineer_Interview_Guide.docx
+|   |       ai_engineer_interview_guide.md
+|   |       azure_ai_search.md
+|   |       copilot_studio.md
+|   |       
+|   +---behavioral
+|   +---cloud-engineer
+|   |       cloud_engineer_interview_guide.md
+|   |       
+|   +---data-engineer
+|   \---python
++---screenshots
++---src
+|   \---interviewcoach
+|       |   openapi.json
+|       |   __init__.py
+|       |   
+|       +---api
+|       +---models
+|       |   |   interview_prep_request.py
+|       |   |   interview_request.py
+|       |   |   skill_gap_request.py
+|       |   |   study_plan_from_skills_request.py
+|       |   |   study_plan_request.py
+|       |   |   
+|       |   \---__pycache__
+|       |           interview_prep_request.cpython-314.pyc
+|       |           interview_request.cpython-314.pyc
+|       |           skill_gap_request.cpython-314.pyc
+|       |           study_plan_from_skills_request.cpython-314.pyc
+|       |           study_plan_request.cpython-314.pyc
+|       |           
+|       +---services
+|       |   |   interview_prep_service.py
+|       |   |   interview_service.py
+|       |   |   knowledge_service.py
+|       |   |   skill_gap_service.py
+|       |   |   study_plan_service.py
+|       |   |   
+|       |   \---__pycache__
+|       |           interview_prep_service.cpython-314.pyc
+|       |           interview_service.cpython-314.pyc
+|       |           knowledge_service.cpython-314.pyc
+|       |           skill_gap_service.cpython-314.pyc
+|       |           study_plan_service.cpython-314.pyc
+|       |           
+|       \---__pycache__
+|               __init__.cpython-314.pyc
+|               
++---tests
+\---__pycache__
+        main.cpython-314.pyc
+        
