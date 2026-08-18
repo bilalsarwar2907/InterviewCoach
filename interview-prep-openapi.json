@@ -33,7 +33,63 @@
           }
         },
         "responses": {
-          "200": { "description": "Interview preparation generated successfully" }
+          "200": {
+            "description": "Interview preparation generated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "role": {
+                      "type": "string",
+                      "description": "The job role the preparation plan was generated for"
+                    },
+                    "questions": {
+                      "type": "array",
+                      "items": { "type": "string" },
+                      "description": "List of interview questions tailored to the role and experience level"
+                    },
+                    "skill_gap": {
+                      "type": "object",
+                      "description": "Skill gap analysis comparing the candidate's skills against role requirements",
+                      "properties": {
+                        "role": { "type": "string" },
+                        "matched_skills": {
+                          "type": "array",
+                          "items": { "type": "string" },
+                          "description": "Skills the candidate already has"
+                        },
+                        "missing_skills": {
+                          "type": "array",
+                          "items": { "type": "string" },
+                          "description": "Skills the candidate needs to develop"
+                        }
+                      }
+                    },
+                    "study_plan": {
+                      "type": "object",
+                      "description": "A 7-day study plan to close the skill gap before the interview",
+                      "properties": {
+                        "role": { "type": "string" },
+                        "plan": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "day": { "type": "integer", "description": "Day number (1 to 7)" },
+                              "focus": { "type": "string", "description": "Skill to study that day" },
+                              "objective": { "type": "string", "description": "What to accomplish" },
+                              "estimated_hours": { "type": "integer", "description": "Hours to spend" }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }

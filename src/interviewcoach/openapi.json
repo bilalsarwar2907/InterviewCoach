@@ -1,3 +1,41 @@
-You are about to visit protozoan-ripcord-flying.ngrok-free.dev, served by 82.211.245.126. This website is served for free through ngrok.com. You should only visit this website if you trust whoever sent the link to you.
-
-ERR_NGROK_6024
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "InterviewCoach",
+    "description": "Generate interview preparation plans including questions, skill gap analysis, and a study plan.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://protozoan-ripcord-flying.ngrok-free.dev"
+    }
+  ],
+  "paths": {
+    "/interview-prep": {
+      "post": {
+        "operationId": "GenerateInterviewPrep",
+        "summary": "Generate interview preparation plan",
+        "description": "Generates interview questions, skill gap analysis, and a study plan for a specified role.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["role", "experience_level", "skills"],
+                "properties": {
+                  "role": { "type": "string", "description": "The job role to prepare for, e.g. AI Engineer" },
+                  "experience_level": { "type": "string", "description": "Candidate experience level: Junior, Mid, or Senior" },
+                  "skills": { "type": "array", "items": { "type": "string" }, "description": "List of skills the candidate already has" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Interview preparation generated successfully" }
+        }
+      }
+    }
+  }
+}

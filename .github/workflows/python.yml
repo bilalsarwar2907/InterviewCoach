@@ -31,3 +31,7 @@ jobs:
       - name: Compile check
         run: |
           python -m compileall .
+
+      - name: Run tests
+        run: |
+          pytest tests/ -v

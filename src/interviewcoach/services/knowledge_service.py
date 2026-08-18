@@ -1,5 +1,10 @@
 from pathlib import Path
 
+# Absolute path to the knowledge/ folder, anchored to this file's location.
+# Works regardless of which directory uvicorn is started from.
+_KNOWLEDGE_ROOT = Path(__file__).resolve().parents[3] / "knowledge"
+
+
 def get_role_folder(role: str) -> str:
     return (
         role.lower()
@@ -14,7 +19,7 @@ def load_role_knowledge(role: str) -> str:
     if not folder:
         return ""
 
-    knowledge_path = Path("knowledge") / folder
+    knowledge_path = _KNOWLEDGE_ROOT / folder
 
     content = []
 
@@ -29,6 +34,7 @@ def load_role_knowledge(role: str) -> str:
 
     return "\n\n".join(content)
 
+
 def extract_skills(knowledge: str) -> list:
     skills = []
 
@@ -38,7 +44,8 @@ def extract_skills(knowledge: str) -> list:
 
         line = line.strip()
 
-        if line == "Core Skills":
+        # Match "Core Skills" with or without any number of leading # characters
+        if line.lstrip("#").strip() == "Core Skills":
             in_core_skills = True
             continue
 
