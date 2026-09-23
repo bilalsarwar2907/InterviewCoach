@@ -2,6 +2,24 @@
 
 A Microsoft Copilot Studio agent connected to a Python FastAPI backend that generates personalised interview preparation plans — including role-specific questions, skill gap analysis, and a 7-day study plan.
 
+InterviewCoach — Microsoft Copilot Studio Agent
+
+I built InterviewCoach by using only the built-in mechanisms of Microsoft Copilot Studio in sequence, connected to a Python FastAPI backend.
+
+Sequence of built-in mechanisms I used:
+
+Knowledge Base Grounding: Uploaded role-specific guides as DOCX files to SharePoint. Copilot Studio's built-in grounding engine handles chunking, embedding and retrieval automatically. I found DOCX works reliably with citations, while Markdown does not.
+AI Parameter Filling: Configured the agent to extract role, experience_level, and skills from natural language without any rigid forms. This is Copilot's built-in NLU, not custom code.
+REST API Tool with OpenAPI 3.0.1: Created a hand-crafted minimal OpenAPI contract (interview-prep-openapi.json) and connected it via Copilot's built-in REST API tool. The tool calls my backend through an InterviewCoach Connection.
+FastAPI Backend via ngrok: The backend itself is simple Python FastAPI exposing /interview-prep. It has 3 services — Questions, Skill Gap, and Study Plan — that read from the same knowledge base.
+Flows: Used Copilot's built-in Power Automate flows.
+Review Interview Plan Flow: Agent > Flow > Human Review > Output > Agent Response
+Test Flow: Lightweight flow to verify agent-flow connection.
+Publish: Tested in Copilot Studio test panel and published to channels. Publishing requires a Copilot Studio user licence.
+I did NOT do: Custom LLM training, fine-tuning, or manual vector database creation. Everything related to LLM, RAG, chunking and embedding was handled by Copilot Studio's built-in mechanisms. I only orchestrated them in the right sequence and provided a clean API and clean DOCX knowledge.
+
+Tech Stack: Microsoft Copilot Studio, Power Automate, FastAPI, Python, ngrok, OpenAPI 3.0.1, SharePoint.
+
 ---
 
 ## What It Does
