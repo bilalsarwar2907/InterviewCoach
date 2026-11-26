@@ -1,0 +1,3 @@
+# Normalize line endings: LF in git, native on checkout.
+# Real binaries (docx, png, pdf) are detected automatically.
+* text=auto
