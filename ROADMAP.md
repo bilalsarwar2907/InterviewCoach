@@ -94,7 +94,10 @@ Only facts from those sources. "Suggested" items are new.
 - **Step 2 — still open:** (a) upload the new real .docx to SharePoint "LearningCopilot" if the copy there is not a real Word file; (b) remove the Test tool + `interviewcoach-minimal.json` together, once the agent opens.
 - **🚫 Blocker found:** Copilot Studio agent "Interview Coach" shows "Something went wrong — we couldn't load Copilot Studio" when opened. New agents and the 2 workflows (Review Interview Plan, Test Flow — both Published) load fine. Agent status = **Draft** (never published). Copilot Studio has a new UI ("agent harness: Standard"); the agent was built in the old UI in Aug — possible cause, not confirmed. This blocks step 3 and all Copilot Studio work.
 
+- **Rule set by Bilal:** Claude may edit **text only** (docs, markdown, config notes) — **no code**. No Claude co-author line in commits. The 2 earlier commits were reworded to remove the `Co-Authored-By: Claude` line (force-push needed); file contents unchanged.
+
 ## Rules kept from earlier sessions
+- Claude edits text only, never code. Commits have Bilal as the only author.
 - Hand-written, minimal OpenAPI contract. Never the FastAPI auto-generated one.
 - If Copilot Studio fails to connect → check the contract first, not the Python.
 - Knowledge files = source of truth. A new role = new files, no code changes.
