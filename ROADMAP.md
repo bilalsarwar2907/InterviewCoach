@@ -42,7 +42,7 @@ Only facts from those sources. "Suggested" items are new.
 | 4 | **Architecture hardening** — see 4a–4d (order: evidence first, then schema) | protect the design before the first data is stored | all parts done, tests pass |
 | 4a | ✅ **DONE 26 Nov** — Knowledge contract: every **active** role folder (has at least 1 `.md` file) must have a `## Core Skills` section + a test that checks them. Empty placeholder folders are skipped until filled | makes "new role = new files" a checked rule, without breaking CI on empty folders | test passes now; fails if an active role breaks the rule |
 | 4b | ✅ **DONE 26 Nov** — **Scoring proof** — run 1 real question, answer it, get: score 1–5, **at least 1 strength, at least 1 weakness, max 3 feedback points** | nothing makes a score today; the schema must come from real output; fixed limits = clean Power BI data | 1 real scored answer saved as an example |
-| 4c | **Session schema from 4b's real output** — date, role, experience_level, score, strengths, weaknesses, duration (adjust to what 4b shows). **One source of truth: the SharePoint list columns**, documented in `architecture.md`. No Pydantic copy (Pydantic only if B is ever built) | avoid two schemas that drift apart | list created; columns = documented schema |
+| 4c | ✅ **DONE 26 Nov** — **Session schema from 4b's real output** — date, role, experience_level, score, strengths, weaknesses, duration (adjust to what 4b shows). **One source of truth: the SharePoint list columns**, documented in `architecture.md`. No Pydantic copy (Pydantic only if B is ever built) | avoid two schemas that drift apart | list created; columns = documented schema |
 | 4d | ✅ Decided 26 Nov: **option A** (Power Automate saves directly) | the design depends on it | done |
 | 5 | Azure App Service instead of ngrok | stable URL before anything depends on it | agent works with your PC off |
 | 6 | Phase 11: save sessions (SharePoint list first, Dataverse later). **If the save fails:** interview continues, error is logged (flow "run after: failed" branch → `SessionErrors` list), flow run history shows details | Gap #3; resilience + demo/interview talking point | 3 real sessions saved + 1 forced failure logged |
@@ -101,8 +101,10 @@ Only facts from those sources. "Suggested" items are new.
 - **Contributors:** all 20 commits on GitHub verified clean (no Claude author / co-author). GitHub's contributor list is cached and updates later.
 - **Rule set by Bilal:** Claude may edit **text only** (docs, markdown, config notes) — **no code**. No Claude co-author line in commits. The 2 earlier commits were reworded to remove the `Co-Authored-By: Claude` line (force-push needed); file contents unchanged.
 
+- **Step 4c ✅ (schema = single source of truth):** SharePoint site **Learning Copilot** → list **`PracticeSessions`**. Columns: `Title` (= the question), `Role` (single line of text), `Score` (number), `Strengths` (multiple lines), `Weaknesses` (multiple lines), `Created` (date, automatic). `experience_level` and `duration` left out for now — not in the agent's real output yet.
+
 ### ▶ RESUME HERE (paused 26 Nov, 14:50)
-- Next: **step 4c** — SharePoint list with columns from 4b output (Score, Strengths, Weaknesses, Role, Question + date). Also fix the run-together lines in the chat reply.
+- Next: **step 5** — Azure App Service instead of ngrok. (Optional first: fix the run-together lines in the agent's chat reply.)
 - Open the agent via Home → … → **Open classic experience**.
 - Push pending commits: `git push`.
 
