@@ -28,7 +28,7 @@ app = FastAPI(
     version="0.1.0",
     servers=[
         {
-            "url": "https://protozoan-ripcord-flying.ngrok-free.dev"
+            "url": "https://interviewcoach-bilal-efdvdcead9d8c8bw.swedencentral-01.azurewebsites.net"
         }
     ]
 )
