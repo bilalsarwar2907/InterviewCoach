@@ -10,7 +10,7 @@ Only facts from those sources. "Suggested" items are new.
 | 0 | Project scaffold (FastAPI, service layers) | ✅ Done | 3 Aug — commit "Phase 0 project scaffold" |
 | 1 | Knowledge base (markdown per role) + SharePoint "LearningCopilot" | ✅ Done | 3 Aug — commit "Phase 3 knowledge base created" |
 | 2 | Copilot Studio agent (zealand.dk environment) | ✅ Done | Aug — setup summary |
-| 3 | Ground agent with SharePoint | ✅ Done | Aug — status "Ready" |
+| 3 | ⏳ **UNBLOCKED 26 Nov** — Phase 8 check: Teams or demo website channel. Open the agent via **classic experience** (see Progress log) | 5-min task, settles the licence question | 1 test chat works |
 | 4 | Interview question generator | ✅ Done | 4 Aug — commits |
 | 5 | Skill gap analyzer | ✅ Done | 4 Aug — commits |
 | 6 | 7-day study planner | ✅ Done | 4 Aug built, 18 Aug fixed (7-day cap) |
@@ -94,6 +94,8 @@ Only facts from those sources. "Suggested" items are new.
 - **Step 2 — still open:** (a) upload the new real .docx to SharePoint "LearningCopilot" if the copy there is not a real Word file; (b) remove the Test tool + `interviewcoach-minimal.json` together, once the agent opens.
 - **🚫 Blocker found:** Copilot Studio agent "Interview Coach" shows "Something went wrong — we couldn't load Copilot Studio" when opened. New agents and the 2 workflows (Review Interview Plan, Test Flow — both Published) load fine. Agent status = **Draft** (never published). Copilot Studio has a new UI ("agent harness: Standard"); the agent was built in the old UI in Aug — possible cause, not confirmed. This blocks step 3 and all Copilot Studio work.
 
+- **✅ Blocker solved:** the agent is a **Standard harness** (classic) agent. The new Copilot Studio (Aug 2026, "GitHub Copilot harness") cannot open it. Fix: Home → **…** (bottom of sidebar) → **Open classic experience** → Skip feedback → new tab → Agents → Interview Coach. Classic mode lasts for that browser session only — repeat each time. Agent opened 26 Nov: model "GPT Chat Latest (Oct 2026)", status **1 Warning** (probably ngrok not running — check in step 3).
+- **Contributors:** all 20 commits on GitHub verified clean (no Claude author / co-author). GitHub's contributor list is cached and updates later.
 - **Rule set by Bilal:** Claude may edit **text only** (docs, markdown, config notes) — **no code**. No Claude co-author line in commits. The 2 earlier commits were reworded to remove the `Co-Authored-By: Claude` line (force-push needed); file contents unchanged.
 
 ## Rules kept from earlier sessions
