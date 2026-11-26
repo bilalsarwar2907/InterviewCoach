@@ -192,7 +192,7 @@ python -m pytest
 - **Knowledge source:** "LearningCopilot" SharePoint library — Status: Ready
 - **REST API tool:** InterviewCoach, connected via `interview-prep-openapi.json`
 - **Flows:** "Review Interview Plan" and "Test Flow" — both Published
-- **Public URL:** `https://protozoan-ripcord-flying.ngrok-free.dev`
+- **Public URL:** `https://interviewcoach-bilal-efdvdcead9d8c8bw.swedencentral-01.azurewebsites.net` (Azure App Service, since 26 Nov 2026; was ngrok before)
 
 ### IMPORTANT — Re-import required
 If `interview-prep-openapi.json` is ever updated, it must be manually re-imported into Copilot Studio:
@@ -201,7 +201,7 @@ If `interview-prep-openapi.json` is ever updated, it must be manually re-importe
 ### How the agent works
 1. User tells the agent their role and skills in natural language
 2. Agent extracts role, skills, and asks for experience_level if not provided
-3. Agent calls `POST /interview-prep` on the FastAPI backend via ngrok
+3. Agent calls `POST /interview-prep` on the FastAPI backend on Azure App Service
 4. Backend returns questions, skill gap, and 7-day study plan
 5. Agent presents results to the user in natural language
 
@@ -294,7 +294,7 @@ If `interview-prep-openapi.json` is ever updated, it must be manually re-importe
 ### If starting Phase 8 (Teams deployment):
 1. Open Copilot Studio → Channels → Microsoft Teams → Enable
 2. Test the agent directly in Teams
-3. Note: ngrok must be running for the backend to respond
+3. Note: the backend runs on Azure, ngrok is no longer needed (first call after idle can be slow, free plan)
 
 ### If adding a new role to the knowledge base:
 1. Create `knowledge/<role-name>/<role>_guide.md`
@@ -308,6 +308,6 @@ If `interview-prep-openapi.json` is ever updated, it must be manually re-importe
 ## Key Decisions Made This Session
 
 - **Single OpenAPI contract** (`interview-prep-openapi.json`) is hand-crafted and minimal — do not replace with auto-generated version from `export_openapi.py` (that generates a different schema format)
-- **ngrok static domain** is free tier — if it ever changes, update the `servers` URL in both `main.py` and `interview-prep-openapi.json`, then re-import into Copilot Studio
+- **Backend URL** — Azure App Service since 26 Nov 2026 (before: ngrok static domain). If the URL ever changes, update the `servers` URL in `main.py`, `interview-prep-openapi.json` and `src/interviewcoach/openapi.json`, AND the **Host** of the custom connector in Power Automate, then reconnect in Copilot Studio
 - **Knowledge files are the source of truth** for role-specific questions — adding a new role only requires adding `.md` files, no code changes needed
 - **Baby steps rule** maintained throughout — one bug at a time, verified before moving to next

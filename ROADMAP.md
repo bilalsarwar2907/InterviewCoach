@@ -44,7 +44,7 @@ Only facts from those sources. "Suggested" items are new.
 | 4b | ✅ **DONE 26 Nov** — **Scoring proof** — run 1 real question, answer it, get: score 1–5, **at least 1 strength, at least 1 weakness, max 3 feedback points** | nothing makes a score today; the schema must come from real output; fixed limits = clean Power BI data | 1 real scored answer saved as an example |
 | 4c | ✅ **DONE 26 Nov** — **Session schema from 4b's real output** — date, role, experience_level, score, strengths, weaknesses, duration (adjust to what 4b shows). **One source of truth: the SharePoint list columns**, documented in `architecture.md`. No Pydantic copy (Pydantic only if B is ever built) | avoid two schemas that drift apart | list created; columns = documented schema |
 | 4d | ✅ Decided 26 Nov: **option A** (Power Automate saves directly) | the design depends on it | done |
-| 5 | Azure App Service instead of ngrok | stable URL before anything depends on it | agent works with your PC off |
+| 5 | ✅ **DONE 26 Nov** — Azure App Service instead of ngrok | stable URL before anything depends on it | agent works with your PC off |
 | 6 | Phase 11: save sessions (SharePoint list first, Dataverse later). **If the save fails:** interview continues, error is logged (flow "run after: failed" branch → `SessionErrors` list), flow run history shows details | Gap #3; resilience + demo/interview talking point | 3 real sessions saved + 1 forced failure logged |
 | 7 | Phase 12: Power BI — sessions done, average score, weakest skills, progress over time | Gap #3 | report runs, you can demo it |
 | 8 | Behavioral role — knowledge files only | proves the rule | works with **zero** Python changes. If code changes seem needed → find out why the role breaks the knowledge contract (4a) |
@@ -103,10 +103,23 @@ Only facts from those sources. "Suggested" items are new.
 
 - **Step 4c ✅ (schema = single source of truth):** SharePoint site **Learning Copilot** → list **`PracticeSessions`**. Columns: `Title` (= the question), `Role` (single line of text), `Score` (number), `Strengths` (multiple lines), `Weaknesses` (multiple lines), `Created` (date, automatic). `experience_level` and `duration` left out for now — not in the agent's real output yet.
 
-### ▶ RESUME HERE (paused 26 Nov, 14:50)
-- Next: **step 5** — Azure App Service instead of ngrok. (Optional first: fix the run-together lines in the agent's chat reply.)
+- **Step 5 ✅ (Azure App Service, 26 Nov evening):**
+  - Web app **`interviewcoach-bilal`** — resource group `rg-interviewcoach`, Sweden Central, Linux, Python 3.12, plan `ASP-MoveMusic-a649` (**Free F1**, shared with an older app).
+  - URL: `https://interviewcoach-bilal-efdvdcead9d8c8bw.swedencentral-01.azurewebsites.net`
+  - Startup command (Configuration → Stack settings): `python -m uvicorn main:app --host 0.0.0.0 --port 8000`
+  - Deploy: Deployment Center → GitHub (`master`) → Azure added `.github/workflows/master_interviewcoach-bilal.yml` (commit `03a0620`). Every push to `master` = new deploy. Auth = user-assigned identity (OIDC). First run failed with *"No subscriptions found"* (role not active yet) → **re-run** fixed it.
+  - Test: `/api-info` answers from Azure ✅.
+  - Bilal changed the URL ngrok → Azure in `main.py`, `interview-prep-openapi.json`, `src/interviewcoach/openapi.json` — commit `13d513c` (Bilal). 23 tests pass (`python -m pytest`).
+  - Power Automate → Custom connectors → InterviewCoach → **Host** changed to the Azure host → Test: **200**, schema validation succeeded.
+  - Copilot Studio: connection had to be reconnected (Open connection manager → InterviewCoach → Connect). Then the agent gave a full 7-day plan + 5 questions **with ngrok off** ✅ = done criterion met.
+  - Known limit: Free F1 has no **Always on** → app sleeps after ~20 min idle, first call slow (~30 s). Upgrade to B1 only if the demo needs it (costs money).
+  - Text updated by Claude: README + PROJECT.md (ngrok → Azure). `interviewcoach-minimal.json` still points to ngrok — it goes away with the Test tool.
+
+### ▶ RESUME HERE (26 Nov, 21:40)
+- Next: **step 6** — Power Automate flow saves each practice session to the SharePoint list `PracticeSessions` (+ `SessionErrors` list for failures).
+- Still open: run-together lines in the agent's score reply; remove the **Test** tool + `interviewcoach-minimal.json`; real .docx in SharePoint (check); **publish** agent + Teams test chat.
 - Open the agent via Home → … → **Open classic experience**.
-- Push pending commits: `git push`.
+- Commit + push this text update (README, PROJECT.md, ROADMAP.md).
 
 ## Rules kept from earlier sessions
 - Claude edits text only, never code. Commits have Bilal as the only author.

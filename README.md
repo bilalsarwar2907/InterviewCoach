@@ -11,14 +11,14 @@ Sequence of built-in mechanisms I used:
 Knowledge Base Grounding: Uploaded role-specific guides as DOCX files to SharePoint. Copilot Studio's built-in grounding engine handles chunking, embedding and retrieval automatically. I found DOCX works reliably with citations, while Markdown does not.
 AI Parameter Filling: Configured the agent to extract role, experience_level, and skills from natural language without any rigid forms. This is Copilot's built-in NLU, not custom code.
 REST API Tool with OpenAPI 3.0.1: Created a hand-crafted minimal OpenAPI contract (interview-prep-openapi.json) and connected it via Copilot's built-in REST API tool. The tool calls my backend through an InterviewCoach Connection.
-FastAPI Backend via ngrok: The backend itself is simple Python FastAPI exposing /interview-prep. It has 3 services — Questions, Skill Gap, and Study Plan — that read from the same knowledge base.
+FastAPI Backend on Azure App Service: The backend itself is simple Python FastAPI exposing /interview-prep, hosted on Azure App Service (Linux, Python 3.12, free F1) and deployed automatically from GitHub Actions on every push to master. It has 3 services — Questions, Skill Gap, and Study Plan — that read from the same knowledge base.
 Flows: Used Copilot's built-in Power Automate flows.
 Review Interview Plan Flow: Agent > Flow > Human Review > Output > Agent Response
 Test Flow: Lightweight flow to verify agent-flow connection.
 Publish: Tested in Copilot Studio test panel and published to channels. Publishing requires a Copilot Studio user licence.
 I did NOT do: Custom LLM training, fine-tuning, or manual vector database creation. Everything related to LLM, RAG, chunking and embedding was handled by Copilot Studio's built-in mechanisms. I only orchestrated them in the right sequence and provided a clean API and clean DOCX knowledge.
 
-Tech Stack: Microsoft Copilot Studio, Power Automate, FastAPI, Python, ngrok, OpenAPI 3.0.1, SharePoint.
+Tech Stack: Microsoft Copilot Studio, Power Automate, FastAPI, Python, Azure App Service, GitHub Actions, OpenAPI 3.0.1, SharePoint. (ngrok only for local testing.)
 
 ---
 
@@ -43,7 +43,7 @@ REST API Tool (OpenAPI 3.0.1 contract)
   |
 InterviewCoach Connection
   |
-Python FastAPI Backend (via ngrok)
+Python FastAPI Backend (Azure App Service)
   |
 Services: Questions, Skill Gap, Study Plan
   |
@@ -218,9 +218,9 @@ Two flows are published:
 
 **DOCX for knowledge files** — Markdown is not reliably retrieved by Copilot Studio's grounding engine. Always use `.docx` and verify citations appear in responses.
 
-**ngrok URL changes on restart** — the OpenAPI contract and Copilot Studio connection must be updated each time ngrok restarts. For persistent use, deploy the backend to a stable URL.
+**Hosting** — the backend runs on Azure App Service (stable URL, works with the PC off). The free F1 plan has no "Always on", so the app sleeps after ~20 min idle and the first request after that is slow (~30 s). ngrok is only needed for local testing; its URL changes on restart.
 
-**Publish requires a licence** — publishing an agent to channels such as Teams requires a Copilot Studio user licence. Building, testing, and running the agent in the test panel works without it.
+**Publish** — checked 26 Nov 2026: the Teams channel shows no licence block in the zealand.dk environment, only "publish your agent first". Wider sharing in Teams may need admin approval.
 
 ---
 
