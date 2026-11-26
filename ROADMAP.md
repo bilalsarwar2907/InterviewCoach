@@ -101,6 +101,11 @@ Only facts from those sources. "Suggested" items are new.
 - **Contributors:** all 20 commits on GitHub verified clean (no Claude author / co-author). GitHub's contributor list is cached and updates later.
 - **Rule set by Bilal:** Claude may edit **text only** (docs, markdown, config notes) — **no code**. No Claude co-author line in commits. The 2 earlier commits were reworded to remove the `Co-Authored-By: Claude` line (force-push needed); file contents unchanged.
 
+### ▶ RESUME HERE (paused 26 Nov, 14:50)
+- Next: **step 4c** — SharePoint list with columns from 4b output (Score, Strengths, Weaknesses, Role, Question + date). Also fix the run-together lines in the chat reply.
+- Open the agent via Home → … → **Open classic experience**.
+- Push pending commits: `git push`.
+
 ## Rules kept from earlier sessions
 - Claude edits text only, never code. Commits have Bilal as the only author.
 - Hand-written, minimal OpenAPI contract. Never the FastAPI auto-generated one.
