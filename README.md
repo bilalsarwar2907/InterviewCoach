@@ -84,6 +84,11 @@ Report file: `powerbi/InterviewCoach.pbix`
 
 ![Power BI report — sessions, average score, score by role, score over time, weaknesses](screenshots/powerbi-report.png)
 
+### 5. Published to Microsoft Teams
+- Agent published in Copilot Studio → channel **Teams and Microsoft 365 Copilot** → installed in Teams.
+
+![Interview Coach installed in Microsoft Teams](screenshots/teams-agent.png)
+
 ---
 
 ## Plan mode — the API
@@ -175,10 +180,12 @@ Swagger UI: `http://localhost:8000/docs`
 
 | Done | Next |
 |---|---|
-| Backend on Azure with CI/CD | Publish the agent + Teams test chat |
-| Save sessions + error logging | Update `architecture.md` |
-| Power BI report | Screenshots, demo video |
+| Backend on Azure with CI/CD | Demo video |
+| Save sessions + error logging | |
+| Power BI report | |
 | Behavioral role — new role = new knowledge file, zero code | |
+| `architecture.md` + screenshots | |
+| Agent published to Teams | |
 
 
 ---
