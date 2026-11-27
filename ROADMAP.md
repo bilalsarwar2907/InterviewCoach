@@ -47,7 +47,7 @@ Only facts from those sources. "Suggested" items are new.
 | 5 | ✅ **DONE 26 Nov** — Azure App Service instead of ngrok | stable URL before anything depends on it | agent works with your PC off |
 | 6 | ✅ **DONE 27 Nov** — Phase 11: save sessions (SharePoint list first, Dataverse later). **If the save fails:** interview continues, error is logged (flow "run after: failed" branch → `SessionErrors` list), flow run history shows details | Gap #3; resilience + demo/interview talking point | 3 real sessions saved + 1 forced failure logged |
 | 7 | ✅ **DONE 27 Nov** — Phase 12: Power BI — sessions done, average score, weakest skills, progress over time (`powerbi/InterviewCoach.pbix`) | Gap #3 | report runs, you can demo it |
-| 8 | Behavioral role — knowledge files only | proves the rule | works with **zero** Python changes. If code changes seem needed → find out why the role breaks the knowledge contract (4a) |
+| 8 | ✅ **DONE 27 Nov** — Behavioral role — knowledge files only (questions moved from Python into the .md files first) | proves the rule | works with **zero** Python changes. If code changes seem needed → find out why the role breaks the knowledge contract (4a) |
 | 9 | Update `architecture.md` | Phase 9 | diagram matches the code |
 | 10 | Packaging: screenshots, 2-min video, README | Phase 10 | README shows flow + report |
 | 11 | 1-page sheet: system flow + patterns: **Facade (used today)**, Adapter (only if 12b) | Gap #1 | you explain it in 2 min, no notes |
@@ -478,8 +478,41 @@ Note: Power BI Desktop only updates when I click **Refresh**. Auto refresh needs
 - All concrete steps (clicks, traps, test table): see section **"Step 7 ✅ DONE — Power BI report in simple words"** above.
 - Test result: 1 new answer (score 2) → Sessions 4 → 5, Average 4,00 → 3,60 → whole chain works.
 
-### ▶ RESUME HERE (27 Nov, 13:20)
-- Next: **step 8** — Behavioral role, knowledge files only (zero Python changes). Or first clear the open items below.
+### 27 Nov 2026 (14:50) — GitHub "Contributors 2 (claude)" fixed
+- Problem: the sidebar still showed **claude** as a contributor, but all commits were clean (0 "Co-Authored-By"). It was GitHub's old cache.
+- Fix (default-branch trick, in order):
+  1. Code tab → click **`master`** button → type `temp` → **Create branch temp from master**.
+  2. **⚙ Settings** (last tab in the top row, *not* the ⚙ next to "About") → General → **Default branch** → ⇄ icon → `temp` → Update → **I understand, update the default branch.**
+  3. Same place → ⇄ → `master` → Update → confirm.
+  4. Code → **Branches** → in **"Your branches"** click 🗑 on the `temp` row (not the master row).
+  5. Repo home page → **Ctrl + F5**.
+- Result: ✅ claude is gone from Contributors. Only Bilal.
+
+### 27 Nov 2026 (15:20) — Step 8 ✅ DONE — Behavioral role
+- **Found first:** skills + study plan were already read from the .md file ✅, but the **questions were written into the Python** (`if "RAG" in knowledge: …`). A new role got bad backup questions ("What is your experience with behavioral?"). Rule: questions must match the role's skills.
+- **Fix (Bilal, code):**
+  1. `knowledge_service.py` → new `extract_questions()` (copy of `extract_skills`, looks for the heading `Interview Questions`).
+  2. `interview_service.py` → import `extract_questions`; the 5 `if` blocks replaced by `role_questions = extract_questions(knowledge)`. Fallback kept.
+- **Knowledge (Claude, text):**
+  3. `ai-engineer/ai_engineer_interview_guide.md` → the 5 old questions moved into an `Interview Questions` list under Core Skills.
+  4. New `behavioral/behavioral_interview_guide.md` → 8 Core Skills, 5 Interview Questions (each tied to a skill), STAR answer method.
+- **File format rule:** `Interview Questions` list, one `- ` per line, in the **same file** as Core Skills (the reader stops at the first list it finds).
+- **Tests:** `python -m pytest` → 23 passed. (`pytest` alone is not on PATH → use `python -m pytest`.)
+- **Real check:** `generate_questions('ai-engineer','junior')` → 3 AI questions from the file + 2 junior. `generate_questions('behavioral','junior')` → 3 behavioral questions from the file + 2 junior, **zero code changes for the new role.** ✅
+- **New open item:** the junior/mid/senior questions (`_LEVEL_QUESTIONS`) are still written into the Python and are technical (Git, debugging), which is wrong for behavioral.
+
+### 27 Nov 2026 (15:25) — Level questions moved into the role files
+- **Problem:** junior/mid/senior questions (`_LEVEL_QUESTIONS`) were written into the Python and technical (Git, debugging), which is wrong for behavioral.
+- **Fix (Bilal, code):**
+  1. `knowledge_service.py` → `extract_questions(knowledge, heading="Interview Questions")`. New `heading` setting; the default keeps the old calls working.
+  2. `interview_service.py` → `level_questions = extract_questions(knowledge, f"{level.capitalize()} Questions")`. If the file has no list → backup `_LEVEL_QUESTIONS`.
+- **Knowledge (Claude, text):** `behavioral_interview_guide.md` → `Junior Questions`, `Mid Questions`, `Senior Questions` lists (2 each, non-technical).
+- **File format now:** `Core Skills`, `Interview Questions`, optional `Junior / Mid / Senior Questions`. Each is a `- ` list in the same file.
+- **Check:** behavioral junior → 3 behavioral + 2 behavioral junior questions (no Git) ✅. ai-engineer junior → 3 AI + Git/debugging backup ✅. Tests: 23 passed.
+
+### ▶ RESUME HERE (27 Nov, 15:25)
+- Next: commit + push (Bilal). Then **step 9** — update `architecture.md` (include the knowledge file format: Core Skills / Interview Questions / level lists).
+- Still open: run-together lines in the score reply; remove the **Test** tool + `interviewcoach-minimal.json`; real .docx in SharePoint (check); **publish** agent + Teams test chat; add a test for `extract_questions` (optional).
 - Still open: run-together lines in the score reply; remove the **Test** tool + `interviewcoach-minimal.json`; real .docx in SharePoint (check); **publish** agent + Teams test chat.
 
 ## Rules kept from earlier sessions

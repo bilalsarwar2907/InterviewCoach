@@ -60,3 +60,29 @@ def extract_skills(knowledge: str) -> list:
             skills.append(line[2:].strip())
 
     return skills
+
+def extract_questions(knowledge: str, heading: str = "Interview Questions") -> list:
+    questions = []
+
+    in_questions = False
+
+    for line in knowledge.splitlines():
+
+        line = line.strip()
+
+        # Match the heading with or without any number of leading # characters
+        if line.lstrip("#").strip() == heading:
+            in_questions = True
+            continue
+
+        if (
+            in_questions
+            and line
+            and not line.startswith("- ")
+        ):
+            break
+
+        if in_questions and line.startswith("- "):
+            questions.append(line[2:].strip())
+
+    return questions

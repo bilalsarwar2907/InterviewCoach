@@ -12,6 +12,14 @@ Core Skills
 - Semantic Kernel
 - Azure AI Foundry
 
+Interview Questions
+
+- Explain the difference between keyword, vector, and hybrid search.
+- How would you ground a Copilot Studio agent using SharePoint?
+- What problem does Semantic Kernel solve in AI applications?
+- What is MCP and when would you use it?
+- Describe a Retrieval-Augmented Generation architecture.
+
 Behavioral Competencies
 
 - Communication
