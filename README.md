@@ -55,16 +55,24 @@ Copilot Studio agent "Interview Coach"
 - **CI/CD:** Deployment Center → GitHub Actions. Every push to `master` deploys automatically. Login with OIDC (no secrets in the repo).
 - The Copilot Studio custom connector points its **Host** at the Azure URL → the agent works with my PC off.
 
+![Azure App Service — Running on Free F1](screenshots/azure-app-service.png)
+
 ### 2. Save every practice answer (Copilot Studio + Power Automate + SharePoint)
 - SharePoint list **`PracticeSessions`**: `Title` (question), `Role`, `Score`, `Strengths`, `Weaknesses`, `Created`. The list columns are the single source of truth for the schema.
 - Agent flow **`Save Practice Session`**: trigger *When an agent calls the flow* (5 inputs) → **Create item** in PracticeSessions → **Respond to the agent**.
 - Added to the agent as a tool, with a clear tool description and a description for every input (the AI fills inputs only from these texts).
+
+![The agent scores an answer 5/5 and calls the Save Practice Session tool](screenshots/copilot-score.png)
+
+![SharePoint list PracticeSessions — one row per scored answer](screenshots/sharepoint-list.png)
 
 ### 3. Design for failure
 - Second list **`SessionErrors`** (`Title`, `ErrorDetails`).
 - A second Create item runs **only if the first one failed or timed out** (*run after*).
 - *Respond to the agent* runs after **is successful + is skipped** → the agent always gets an answer; the interview never stops.
 - Tested on purpose with a 298-character question (SharePoint Title max 255). This found 2 bugs the happy path never shows; fixed with `take(...)` and `string(actions('Create_item')?['error'])`.
+
+<img src="screenshots/power-automate-flow.png" alt="Power Automate flow: trigger → Create item → Create item 1 (only on failure) → Respond to the agent" width="400">
 
 ### 4. Power BI report
 - Power BI Desktop → **SharePoint Online List** (2.0) → `PracticeSessions`.
@@ -73,6 +81,8 @@ Copilot Studio agent "Interview Coach"
 - End-to-end test: 1 new practice answer (score 2) → Refresh → sessions 4 → 5, average 4,00 → 3,60, every chart changed.
 
 Report file: `powerbi/InterviewCoach.pbix`
+
+![Power BI report — sessions, average score, score by role, score over time, weaknesses](screenshots/powerbi-report.png)
 
 ---
 
@@ -107,9 +117,10 @@ Returns role-specific `questions`, a `skill_gap` (matched / missing skills) and 
 
 ## Knowledge base
 
-- One folder per role in `knowledge/` (e.g. `ai-engineer`, `cloud-engineer`).
-- **A new role = new files, no code changes.**
-- A test (`tests/test_knowledge_contract.py`) checks that every active role folder has a `## Core Skills` section. Empty placeholder folders are skipped.
+- One folder per role in `knowledge/` (`ai-engineer`, `cloud-engineer`, `behavioral`).
+- **A new role = new files, no code changes.** Proven with `behavioral`: added as one .md file, zero Python changes.
+- Each role file has `Core Skills` (→ skill gap + study plan), `Interview Questions` (→ role questions) and optional `Junior / Mid / Senior Questions` (→ level questions). Without level lists, built-in technical backup questions are used. Full format: [`architecture/architecture.md`](architecture/architecture.md).
+- A test (`tests/test_knowledge_contract.py`) checks that every active role folder has a `Core Skills` section. Empty placeholder folders are skipped.
 - For Copilot Studio grounding, the guides are uploaded to SharePoint as **.docx** — Markdown did not reliably give citations.
 
 ---
@@ -128,6 +139,7 @@ InterviewCoach/
 ├── tests/                        # 23 tests (services + knowledge contract)
 ├── powerbi/InterviewCoach.pbix   # Power BI report
 ├── architecture/architecture.md
+├── screenshots/                  # pictures used in this README
 ├── docs/
 └── .github/workflows/            # Azure deploy (GitHub Actions)
 ```
