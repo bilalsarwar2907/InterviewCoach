@@ -1,34 +1,26 @@
 # InterviewCoach
 
-A Microsoft Copilot Studio agent connected to a Python FastAPI backend that generates personalised interview preparation plans — including role-specific questions, skill gap analysis, and a 7-day study plan.
+An interview practice agent built with **Microsoft Copilot Studio**, **Power Automate**, **SharePoint** and **Power BI**, backed by a small **Python FastAPI** service on **Azure App Service**.
 
-InterviewCoach — Microsoft Copilot Studio Agent
-
-I built InterviewCoach by using only the built-in mechanisms of Microsoft Copilot Studio in sequence, connected to a Python FastAPI backend.
-
-Sequence of built-in mechanisms I used:
-
-Knowledge Base Grounding: Uploaded role-specific guides as DOCX files to SharePoint. Copilot Studio's built-in grounding engine handles chunking, embedding and retrieval automatically. I found DOCX works reliably with citations, while Markdown does not.
-AI Parameter Filling: Configured the agent to extract role, experience_level, and skills from natural language without any rigid forms. This is Copilot's built-in NLU, not custom code.
-REST API Tool with OpenAPI 3.0.1: Created a hand-crafted minimal OpenAPI contract (interview-prep-openapi.json) and connected it via Copilot's built-in REST API tool. The tool calls my backend through an InterviewCoach Connection.
-FastAPI Backend on Azure App Service: The backend itself is simple Python FastAPI exposing /interview-prep, hosted on Azure App Service (Linux, Python 3.12, free F1) and deployed automatically from GitHub Actions on every push to master. It has 3 services — Questions, Skill Gap, and Study Plan — that read from the same knowledge base.
-Flows: Used Copilot's built-in Power Automate flows.
-Review Interview Plan Flow: Agent > Flow > Human Review > Output > Agent Response
-Test Flow: Lightweight flow to verify agent-flow connection.
-Publish: Tested in Copilot Studio test panel and published to channels. Publishing requires a Copilot Studio user licence.
-I did NOT do: Custom LLM training, fine-tuning, or manual vector database creation. Everything related to LLM, RAG, chunking and embedding was handled by Copilot Studio's built-in mechanisms. I only orchestrated them in the right sequence and provided a clean API and clean DOCX knowledge.
-
-Tech Stack: Microsoft Copilot Studio, Power Automate, FastAPI, Python, Azure App Service, GitHub Actions, OpenAPI 3.0.1, SharePoint. (ngrok only for local testing.)
+It does two things:
+1. **Plan mode** — you give a role and your skills → you get interview questions, a skill gap analysis and a 7-day study plan.
+2. **Practice mode** — the agent asks you a question, scores your answer (1–5) with strengths and weaknesses, and **saves every scored answer**. A Power BI report shows your progress.
 
 ---
 
-## What It Does
+## How it works — in simple words
 
-You describe a role and your current skills. The agent calls the backend and returns:
+| Part | Role | Picture |
+|---|---|---|
+| **Copilot Studio agent** | Talks to you, asks questions, gives the score, decides which tool to call | The **boss** |
+| **Power Automate flow** | Does the same save steps every time | The **helper** |
+| **SharePoint list** | Stores one row per scored answer | The **notebook** |
+| **Power BI** | Reads the notebook and draws charts | The **window** |
+| **Azure App Service** | Runs the Python backend in the cloud (Free F1 — sleeps after ~20 min idle) | The **computer in the cloud** |
 
-- Interview questions tailored to the role and experience level (technical, behavioural, and follow-up)
-- Skill gap analysis showing matched skills vs. missing skills, prioritised by importance
-- A 7-day study plan to close the gaps before the interview
+> **Boss scores → Helper saves → Notebook keeps → Power BI shows.**
+
+The agent can talk and score, but it cannot write to a table by itself — that is why the flow (helper) exists.
 
 ---
 
@@ -36,196 +28,151 @@ You describe a role and your current skills. The agent calls the backend and ret
 
 ```
 User
-  |
-Microsoft Copilot Studio (Interview Coach Agent)
-  |
-REST API Tool (OpenAPI 3.0.1 contract)
-  |
-InterviewCoach Connection
-  |
-Python FastAPI Backend (Azure App Service)
-  |
-Services: Questions, Skill Gap, Study Plan
-  |
-Knowledge Base (role-specific DOCX guides)
-```
-
-The agent uses AI parameter filling — it extracts `role`, `experience_level`, and `skills` from natural language without rigid forms.
-
----
-
-## Project Structure
-
-```
-InterviewCoach/
-|
-|-- main.py                        # FastAPI app entry point
-|-- requirements.txt
-|-- README.md
-|-- interview-prep-openapi.json    # OpenAPI contract used by Copilot Studio
-|
-|-- src/
-|   |-- interviewcoach/
-|       |-- models/
-|       |   |-- interview_prep_request.py
-|       |   |-- interview_request.py
-|       |   |-- skill_gap_request.py
-|       |   |-- study_plan_request.py
-|       |   |-- study_plan_from_skills_request.py
-|       |
-|       |-- services/
-|           |-- interview_prep_service.py
-|           |-- interview_service.py
-|           |-- skill_gap_service.py
-|           |-- study_plan_service.py
-|           |-- knowledge_service.py
-|
-|-- knowledge/
-|   |-- ai-engineer/
-|   |   |-- AI_Engineer_Interview_Guide.docx
-|   |   |-- copilot_studio.md
-|   |   |-- azure_ai_search.md
-|   |-- cloud-engineer/
-|   |-- python/
-|   |-- behavioral/
-|   |-- data-engineer/
-|
-|-- tests/
-|-- docs/
-|-- architecture/
+ │
+ ▼
+Copilot Studio agent "Interview Coach"
+ ├─ MODE 1 — plan
+ │    └─ REST API tool (hand-written OpenAPI 3.0.1 contract)
+ │         └─ custom connector → Azure App Service (FastAPI)
+ │              └─ services: Questions · Skill Gap · Study Plan  ← knowledge/ (one folder per role)
+ │
+ └─ MODE 2 — practice (agent scores the answer itself)
+      └─ agent flow "Save Practice Session" (Power Automate)
+           ├─ OK     → SharePoint list  PracticeSessions
+           └─ failed → SharePoint list  SessionErrors   (interview continues)
+                              │
+                              ▼
+                       Power BI report
 ```
 
 ---
 
-## API Endpoints
+## What I built, step by step
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/` | Root |
-| GET | `/health` | Health check |
-| GET | `/api-info` | API metadata |
-| GET | `/knowledge/{role}` | Knowledge base for a role |
-| POST | `/interview/questions` | Generate interview questions |
-| POST | `/skill-gap` | Skill gap analysis |
-| POST | `/study-plan` | Generate study plan |
-| POST | `/study-plan-from-skills` | Study plan from skills list |
-| POST | `/interview-prep` | Full preparation plan (primary endpoint) |
+### 1. Backend in the cloud (Azure App Service)
+- Web app on **Linux, Python 3.12, Free F1**, region Sweden Central.
+- Startup command: `python -m uvicorn main:app --host 0.0.0.0 --port 8000`
+- **CI/CD:** Deployment Center → GitHub Actions. Every push to `master` deploys automatically. Login with OIDC (no secrets in the repo).
+- The Copilot Studio custom connector points its **Host** at the Azure URL → the agent works with my PC off.
 
-### Primary Endpoint
+### 2. Save every practice answer (Copilot Studio + Power Automate + SharePoint)
+- SharePoint list **`PracticeSessions`**: `Title` (question), `Role`, `Score`, `Strengths`, `Weaknesses`, `Created`. The list columns are the single source of truth for the schema.
+- Agent flow **`Save Practice Session`**: trigger *When an agent calls the flow* (5 inputs) → **Create item** in PracticeSessions → **Respond to the agent**.
+- Added to the agent as a tool, with a clear tool description and a description for every input (the AI fills inputs only from these texts).
 
-`POST /interview-prep`
+### 3. Design for failure
+- Second list **`SessionErrors`** (`Title`, `ErrorDetails`).
+- A second Create item runs **only if the first one failed or timed out** (*run after*).
+- *Respond to the agent* runs after **is successful + is skipped** → the agent always gets an answer; the interview never stops.
+- Tested on purpose with a 298-character question (SharePoint Title max 255). This found 2 bugs the happy path never shows; fixed with `take(...)` and `string(actions('Create_item')?['error'])`.
 
-Request:
+### 4. Power BI report
+- Power BI Desktop → **SharePoint Online List** (2.0) → `PracticeSessions`.
+- Power Query: kept 6 columns; `Score` changed from text to **Whole Number**.
+- Visuals: **Sessions done** (Count of Title), **Average score**, **Average score by role** (weakest role), **Weaknesses table**, **Average score over time**.
+- End-to-end test: 1 new practice answer (score 2) → Refresh → sessions 4 → 5, average 4,00 → 3,60, every chart changed.
+
+Report file: `powerbi/InterviewCoach.pbix`
+
+---
+
+## Plan mode — the API
+
+Primary endpoint used by the agent: `POST /interview-prep`
+
 ```json
 {
-  "role": "Junior AI Engineer",
+  "role": "ai-engineer",
   "experience_level": "Junior",
   "skills": ["Python", "Azure"]
 }
 ```
 
-Response:
-```json
-{
-  "role": "Junior AI Engineer",
-  "questions": ["..."],
-  "skill_gap": {
-    "matched_skills": [],
-    "missing_skills": []
-  },
-  "study_plan": {
-    "role": "Junior AI Engineer",
-    "plan": []
-  }
-}
+Returns role-specific `questions`, a `skill_gap` (matched / missing skills) and a 7-day `study_plan`.
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/health` | Health check |
+| GET | `/api-info` | API metadata |
+| GET | `/knowledge/{role}` | Knowledge base for a role |
+| POST | `/interview/questions` | Interview questions |
+| POST | `/skill-gap` | Skill gap analysis |
+| POST | `/study-plan` | Study plan |
+| POST | `/study-plan-from-skills` | Study plan from a skills list |
+| POST | `/interview-prep` | Full plan (**the one Copilot Studio uses**) |
+
+**Design pattern:** `/interview-prep` is a **Facade** — one call hides the 3 services (questions, skill gap, study plan).
+
+---
+
+## Knowledge base
+
+- One folder per role in `knowledge/` (e.g. `ai-engineer`, `cloud-engineer`).
+- **A new role = new files, no code changes.**
+- A test (`tests/test_knowledge_contract.py`) checks that every active role folder has a `## Core Skills` section. Empty placeholder folders are skipped.
+- For Copilot Studio grounding, the guides are uploaded to SharePoint as **.docx** — Markdown did not reliably give citations.
+
+---
+
+## Project structure
+
+```
+InterviewCoach/
+├── main.py                       # FastAPI app
+├── interview-prep-openapi.json   # contract used by Copilot Studio
+├── requirements.txt
+├── ROADMAP.md                    # plan, progress log, step-by-step notes
+├── src/interviewcoach/
+│   ├── models/                   # request models
+│   └── services/                 # questions, skill gap, study plan, knowledge
+├── knowledge/                    # one folder per role
+├── tests/                        # 23 tests (services + knowledge contract)
+├── powerbi/InterviewCoach.pbix   # Power BI report
+├── architecture/architecture.md
+├── docs/
+└── .github/workflows/            # Azure deploy (GitHub Actions)
 ```
 
 ---
 
-## Local Setup
-
-### Prerequisites
-
-- Python 3.10+
-- ngrok account (free tier works)
-- Microsoft Copilot Studio access
-
-### Run the Backend
+## Run locally
 
 ```bash
 git clone https://github.com/bilalsarwar2907/InterviewCoach.git
 cd InterviewCoach
-
 pip install -r requirements.txt
-
 uvicorn main:app --reload --port 8000
-```
-
-Expose locally via ngrok:
-
-```bash
-ngrok http 8000
+python -m pytest
 ```
 
 Swagger UI: `http://localhost:8000/docs`
 
-### Test the API
+---
 
-```bash
-curl -X POST http://localhost:8000/interview-prep \
-  -H "Content-Type: application/json" \
-  -d '{"role": "Python Developer", "experience_level": "Mid", "skills": ["Python", "FastAPI"]}'
-```
+## Lessons learned
+
+- **Start with a minimal, hand-written OpenAPI contract.** If Copilot Studio fails to connect, check the contract first, not the Python.
+- **LLM tools are chosen by their descriptions.** Inputs named "Text 1, Text 2" get wrong values; instructions that say "do not call any tool" block the tool you need.
+- **Test the error path on purpose.** It had 2 bugs the normal test never showed.
+- **Clean the data before the report.** Two spellings of one role = two bars in Power BI.
+- **Power BI guesses the maths.** Always check Sum vs Average vs Count, and Date Hierarchy vs the real date.
+- **Free F1 trade-off:** no "Always on" → the app sleeps after ~20 min idle, first call ~30 s. For a real product: B1 or Container Apps.
 
 ---
 
-## Copilot Studio Setup
+## Status
 
-### OpenAPI Contract
+| Done | Next |
+|---|---|
+| Backend on Azure with CI/CD | Publish the agent + Teams test chat |
+| Save sessions + error logging | Behavioral role (knowledge files only) |
+| Power BI report | Update `architecture.md`, screenshots, demo video |
 
-Use the hand-crafted minimal contract (`interview-prep-openapi.json`) — not the auto-generated FastAPI schema. The generated schema does not work reliably with Copilot Studio's REST API tool importer.
-
-The contract must have a meaningful `operationId`, clear field descriptions, and a simple request/response structure.
-
-### REST API Tool
-
-1. Go to Tools > New tool > REST API
-2. Upload `interview-prep-openapi.json`
-3. Complete the API Plugin Details and Authentication steps
-4. Select the `GenerateInterviewPrep` operation
-5. Enable "Dynamically fill with AI" for all parameters
-6. Publish
-
-### Knowledge Base
-
-Knowledge files must be in DOCX format. Markdown files uploaded to SharePoint do not reliably trigger retrieval — the agent answers from general knowledge with no citation. Converting to `.docx` fixes this.
-
----
-
-## Agent Flows
-
-Two flows are published:
-
-**Review Interview Plan** — routes generated plans through a human review step before delivery. Uses the pattern: Agent > Flow > Request Information > Human Review > Flow Output > Agent Response.
-
-**Test Flow** — lightweight flow used to verify the agent-flow connection during development.
-
----
-
-## Key Findings
-
-**Minimal OpenAPI contract** — start with a single endpoint and a hand-crafted contract. Add complexity only after the base case works. The failure point is almost always the contract, not the backend.
-
-**DOCX for knowledge files** — Markdown is not reliably retrieved by Copilot Studio's grounding engine. Always use `.docx` and verify citations appear in responses.
-
-**Hosting** — the backend runs on Azure App Service (stable URL, works with the PC off). The free F1 plan has no "Always on", so the app sleeps after ~20 min idle and the first request after that is slow (~30 s). ngrok is only needed for local testing; its URL changes on restart.
-
-**Publish** — checked 26 Nov 2026: the Teams channel shows no licence block in the zealand.dk environment, only "publish your agent first". Wider sharing in Teams may need admin approval.
+Full plan and progress log: [`ROADMAP.md`](ROADMAP.md)
 
 ---
 
 ## Author
 
-H.M. Bilal Sarwar  
-Copenhagen, Denmark  
+H.M. Bilal Sarwar — Copenhagen, Denmark
 [github.com/bilalsarwar2907](https://github.com/bilalsarwar2907)
