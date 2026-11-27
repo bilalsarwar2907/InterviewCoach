@@ -280,6 +280,120 @@ Why this order: each step needs the one before. The helper cannot pick a noteboo
 
 > **First the notebook (SharePoint), then the helper (Power Automate), then you tell the boss (Agent) to use the helper.**
 
+## Step 7 ✅ DONE — Power BI report in simple words (27 Nov)
+
+### What is Power BI, in simple words?
+
+Power BI is just a **window that looks at the Notebook.**
+
+It does not decide. It does not save. It just shows what is already in SharePoint.
+
+> **Boss scores → Helper saves → Notebook keeps → Power BI shows**
+
+If the Notebook changes, Power BI changes. Nothing else.
+
+### What I did, in order — practical clicks
+
+**1. Clean the Notebook first — this was important**
+- Row 1 said `"Junior AI Engineer"`, the others said `"ai-engineer"`.
+- Same role, two spellings = Power BI thinks they are 2 different roles.
+- Fix: in SharePoint → PracticeSessions → Row 1 → Role = `ai-engineer` → Save. (Done **before** opening Power BI.)
+- Now there are only 2 roles: `ai-engineer` and `data-engineer`.
+
+> Lesson: Clean the Notebook first, then build the report. If the Notebook is dirty, the report is dirty.
+
+**2. Open Power BI Desktop and connect to the Notebook**
+- Sign in with my **zealand.dk** account (same login as SharePoint).
+- **Home → Get data ▾ → More… →** search **SharePoint Online List → Connect**
+- Site URL: `https://zealanddk.sharepoint.com/sites/LearningCopilot`
+  (only up to the site name — cut off `/SitePages/...`)
+- Implementation: **2.0 → OK**
+- Sign-in window: left side **Microsoft account → Sign in → Connect** (not Anonymous)
+- Navigator: tick **PracticeSessions** only → **Transform Data** (not Load)
+
+**3. Clean the columns in Power Query (the cleaning room)**
+- SharePoint brings many hidden extra columns (ID, Version, Author …).
+- **Choose Columns** → untick *(Select All Columns)* → tick only `Title, Role, Score, Strengths, Weaknesses, Created` → OK
+- `Score` showed **ABC** = text. Text cannot be averaged.
+  → click **ABC** on the Score header → **Whole Number** → now **123**.
+- Trap I hit: I changed **Role** to a number by mistake → Role became errors → deleted that step (X in Applied Steps).
+- Trap 2: *Remove Errors* deletes whole **rows** — check you still have all rows after.
+- **Close & Apply** → the table appears in the **Data** pane.
+
+**4. Make the cards — this was the difficult part**
+
+A Card is just one big number. But Power BI does not know *which* number you want.
+
+You must tell it, by dragging the right column into **Value**, and setting the right maths.
+
+Card 1 — **Count of Title** (sessions done)
+- Click an empty spot → Visual: **Card** (⚡123 icon, under the pie)
+- Drag: `Title` into **Value** (not Categories — there it shows no Count)
+- Click **⌄** next to Title → **Count** (not Count Distinct)
+- Why Title? Every row has a Title = every row is one session.
+- Result then: **4**
+
+Card 2 — **Average of Score**
+- Click an empty spot → Visual: **Card**
+- Drag: `Score` into **Value**
+- It says **Sum** by default → **⌄ → Average**
+- If you leave it on Sum, you get 16 (4+4+4+4), not 4,00. That was the trap.
+- Result then: **4,00**
+
+> Why it was difficult: The Card does not match the column by itself. You have to drag the column AND tell Power BI: Average or Count or Sum. If the maths is wrong, the Card is wrong, even if the Notebook is right.
+
+**5. Make the bar chart — Average Score by Role**
+- Visual: **Clustered bar chart** (1st icon, top left)
+- Y-axis: `Role`
+- X-axis: `Score` → **Average of Score**
+- Shortest bar = weakest role.
+
+**6. Make the Weaknesses table**
+- Visual: **Table** (plain grid icon)
+- Drag: `Role` + `Weaknesses` into **Columns**
+- Weaknesses is free text — Power BI cannot count sentences, so I read them here.
+
+**7. Make the line chart — Average Score by Created**
+- Visual: **Line chart** (row 2, 1st icon)
+- X-axis: `Created` → **⌄ → Created** (not *Date Hierarchy* — that shows "by Year" = 1 dot)
+- Y-axis: `Score` → **Average of Score**
+- Result then: flat line at 4.
+
+**8. Save**
+- **Ctrl + S** → *Browse this device* → `C:\Users\biges\InterviewCoach\powerbi\InterviewCoach.pbix`
+- No need to *Upload to OneDrive*.
+
+### The test — 1 new answer changed every chart
+
+Before the test:
+- Sessions: 4
+- Average: 4,00
+
+I answered 1 more practice question (data-engineer, weak answer on purpose). I got score **2**.
+Then in Power BI: **Home → Refresh**.
+
+| Chart | Before | After |
+|---|---|---|
+| Sessions done (Count of Title) | 4 | **5** ✅ |
+| Average score | 4,00 | **3,60** ✅ |
+| Data-engineer bar | 4 | **3** ✅ |
+| Line chart | flat at 4 | **drops to 2** ✅ |
+| Weaknesses table | 4 rows | **5 rows** ✅ |
+
+Maths: 4 + 4 + 4 + 4 = 16. 16 + 2 = 18. 18 ÷ 5 = **3,60**.
+
+I did not type any number in Power BI. I just answered, the Boss scored, the Helper saved, the Notebook kept, and Power BI showed it.
+
+Note: Power BI Desktop only updates when I click **Refresh**. Auto refresh needs Publish to Power BI Service — later, optional.
+
+### In one sentence
+
+> **One new answer changed every chart — so the whole chain works, from end to end.**
+
+### Interview line 🎤
+
+> "Every practice answer is scored by the agent, saved by a Power Automate flow into SharePoint, and shown in a Power BI report. I tested it end to end: one new answer changed every chart. The hardest part was the Cards — I had to match each Card to the right SharePoint column and set Average vs Count by hand, otherwise Power BI shows the wrong number."
+
 ## Progress log (newest at the bottom — check here what was done)
 
 ### 26 Nov 2026
@@ -361,11 +475,8 @@ Why this order: each step needs the one before. The helper cannot pick a noteboo
 - Lesson: Power BI guesses the summary (Sum, First, Date Hierarchy). Always check the ⌄ menu.
 
 ### 27 Nov 2026 (13:20) — Step 7 ✅ DONE
-- **Refresh test (end-to-end):** practice question in the agent (data-engineer, weak answer on purpose) → **score 2/5** → flow saved row 5 in `PracticeSessions` → Power BI **Home → Refresh** → all visuals changed as predicted: Sessions **4 → 5**, Average **4,00 → 3,60**, data-engineer bar **4 → 3**, line chart drops, new weakness in the table.
-- Proves the whole chain: **Agent (boss) → Flow (helper) → SharePoint (notebook) → Power BI (charts)**.
-- Page laid out: 2 cards left, bar chart middle, line chart + weaknesses table right.
-- Known: data refreshes only when **Refresh** is clicked (Desktop). Auto refresh needs Publish to Power BI Service — later, optional.
-- Seen again: run-together lines in the agent's score reply (open item).
+- All concrete steps (clicks, traps, test table): see section **"Step 7 ✅ DONE — Power BI report in simple words"** above.
+- Test result: 1 new answer (score 2) → Sessions 4 → 5, Average 4,00 → 3,60 → whole chain works.
 
 ### ▶ RESUME HERE (27 Nov, 13:20)
 - Next: **step 8** — Behavioral role, knowledge files only (zero Python changes). Or first clear the open items below.
