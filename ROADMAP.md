@@ -45,7 +45,7 @@ Only facts from those sources. "Suggested" items are new.
 | 4c | ✅ **DONE 26 Nov** — **Session schema from 4b's real output** — date, role, experience_level, score, strengths, weaknesses, duration (adjust to what 4b shows). **One source of truth: the SharePoint list columns**, documented in `architecture.md`. No Pydantic copy (Pydantic only if B is ever built) | avoid two schemas that drift apart | list created; columns = documented schema |
 | 4d | ✅ Decided 26 Nov: **option A** (Power Automate saves directly) | the design depends on it | done |
 | 5 | ✅ **DONE 26 Nov** — Azure App Service instead of ngrok | stable URL before anything depends on it | agent works with your PC off |
-| 6 | Phase 11: save sessions (SharePoint list first, Dataverse later). **If the save fails:** interview continues, error is logged (flow "run after: failed" branch → `SessionErrors` list), flow run history shows details | Gap #3; resilience + demo/interview talking point | 3 real sessions saved + 1 forced failure logged |
+| 6 | ✅ **DONE 27 Nov** — Phase 11: save sessions (SharePoint list first, Dataverse later). **If the save fails:** interview continues, error is logged (flow "run after: failed" branch → `SessionErrors` list), flow run history shows details | Gap #3; resilience + demo/interview talking point | 3 real sessions saved + 1 forced failure logged |
 | 7 | Phase 12: Power BI — sessions done, average score, weakest skills, progress over time | Gap #3 | report runs, you can demo it |
 | 8 | Behavioral role — knowledge files only | proves the rule | works with **zero** Python changes. If code changes seem needed → find out why the role breaks the knowledge contract (4a) |
 | 9 | Update `architecture.md` | Phase 9 | diagram matches the code |
@@ -123,11 +123,24 @@ Only facts from those sources. "Suggested" items are new.
   - Found: Role values differ ("Junior AI Engineer" in the old row vs "ai-engineer") → clean this before Power BI (e.g. fixed role list in the input description).
   - Warning seen: "environment has insufficient Copilot Credits" — test runs are free; check again when published.
 
-### ▶ RESUME HERE (27 Nov, 09:15)
-- Step 6 left: (a) **failure branch** — list `SessionErrors` + flow "run after: has failed" → log the error; (b) 2 more real sessions + 1 forced failure.
-- Still open: run-together lines in the score reply; same Role spelling; remove the **Test** tool + `interviewcoach-minimal.json`; real .docx in SharePoint (check); **publish** agent + Teams test chat.
-- Open the agent via Home → … → **Open classic experience**.
-- Commit + push ROADMAP.md.
+- **Step 6 — part 2 ✅ (27 Nov, failure branch):**
+  - New SharePoint list **`SessionErrors`**: `Title` (the question, cut to 250 chars), `ErrorDetails` (multiple lines), `Created` (automatic).
+  - Flow `Save Practice Session` now: Create item (PracticeSessions) → **Create item 1** (SessionErrors), *run after* = **has failed + has timed out** only → **Respond to the agent**, *run after* Create item 1 = **is successful + is skipped** (so the agent always gets an answer).
+  - Create item 1: Title = `take(triggerBody()?['text'], 250)`, ErrorDetails = `string(actions('Create_item')?['error'])`.
+  - Forced failure test (manual flow test, 298-char question → SharePoint Title max 255): run 1 → the error branch failed too (same long Title) → fixed with `take(...)`. Run 2 → ErrorDetails empty: `outputs('Create_item')?['body']` is empty when the request is stopped before SharePoint → fixed with `actions('Create_item')?['error']`. Run 3 → **flow "ran successfully", row in SessionErrors with the full error** ✅.
+  - Lesson (interview talking point): test the error path — it had 2 bugs the happy path never shows.
+  - Known risk: a real question over 255 chars is **not saved** in PracticeSessions (only logged in SessionErrors). Decide: cut Title to 255 in the main Create item too?
+  - Test row 1 in SessionErrors (empty ErrorDetails) is test noise — Bilal can delete it.
+
+- **Step 6 ✅ DONE (27 Nov, 09:55):**
+  - Main Create item Title changed to `take(triggerBody()?['text'], 255)` → long questions are cut and still saved (decision by Bilal). Error branch kept for all other errors.
+  - 3 real practice sessions through the agent, all saved in `PracticeSessions`: 2× ai-engineer (production RAG design / RAG design + evaluation), 1× data-engineer (reliable ETL pipeline), all score 4. Plus 1 forced failure logged in `SessionErrors` = done criterion met.
+  - Noticed: the strengths/weaknesses saved are the AI's own short rewording of the chat text (not word for word). Fine for Power BI.
+
+### ▶ RESUME HERE (27 Nov, 09:55)
+- Next: **step 7** — Power BI report on `PracticeSessions`: sessions done, average score, weakest skills, progress over time.
+- Before Power BI: same Role spelling (row 1 says "Junior AI Engineer", others "ai-engineer") — fix row 1 by hand or filter it out.
+- Still open: run-together lines in the score reply; remove the **Test** tool + `interviewcoach-minimal.json`; real .docx in SharePoint (check); **publish** agent + Teams test chat.
 
 ## Rules kept from earlier sessions
 - Claude edits text only, never code. Commits have Bilal as the only author.
