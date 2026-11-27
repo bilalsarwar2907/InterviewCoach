@@ -115,11 +115,19 @@ Only facts from those sources. "Suggested" items are new.
   - Known limit: Free F1 has no **Always on** → app sleeps after ~20 min idle, first call slow (~30 s). Upgrade to B1 only if the demo needs it (costs money).
   - Text updated by Claude: README + PROJECT.md (ngrok → Azure). `interviewcoach-minimal.json` still points to ngrok — it goes away with the Test tool.
 
-### ▶ RESUME HERE (26 Nov, 21:40)
-- Next: **step 6** — Power Automate flow saves each practice session to the SharePoint list `PracticeSessions` (+ `SessionErrors` list for failures).
-- Still open: run-together lines in the agent's score reply; remove the **Test** tool + `interviewcoach-minimal.json`; real .docx in SharePoint (check); **publish** agent + Teams test chat.
+- **Step 6 — part 1 ✅ (27 Nov, happy path):**
+  - Agent flow **`Save Practice Session`** (Copilot Studio → Add a tool → Agent flow). Trigger *When an agent calls the flow* with 5 inputs: `Question` (text), `Role` (text), `Score` (number), `Strengths` (text), `Weaknesses` (text) → **SharePoint Create item** (site Learning Copilot, list `PracticeSessions`; Title←Question, Role, Score, Strengths, Weaknesses) → *Respond to the agent*. Published.
+  - Added as a tool to Interview Coach. Tool description + every input got a clear name/description (otherwise the AI sees only "Text 1, Text 2…"). Completion: *Don't respond*.
+  - Instructions, MODE 2: "do NOT call any tool" changed to "do NOT call the *Generate interview preparation plan* tool" + new line: after the score, call *Save Practice Session* once; tell the user only if it fails. (The old line would have blocked the save.)
+  - Test: practice question on production RAG → score 4/5 → **new row in `PracticeSessions`** ✅ (1 of 3 real sessions).
+  - Found: Role values differ ("Junior AI Engineer" in the old row vs "ai-engineer") → clean this before Power BI (e.g. fixed role list in the input description).
+  - Warning seen: "environment has insufficient Copilot Credits" — test runs are free; check again when published.
+
+### ▶ RESUME HERE (27 Nov, 09:15)
+- Step 6 left: (a) **failure branch** — list `SessionErrors` + flow "run after: has failed" → log the error; (b) 2 more real sessions + 1 forced failure.
+- Still open: run-together lines in the score reply; same Role spelling; remove the **Test** tool + `interviewcoach-minimal.json`; real .docx in SharePoint (check); **publish** agent + Teams test chat.
 - Open the agent via Home → … → **Open classic experience**.
-- Commit + push this text update (README, PROJECT.md, ROADMAP.md).
+- Commit + push ROADMAP.md.
 
 ## Rules kept from earlier sessions
 - Claude edits text only, never code. Commits have Bilal as the only author.
