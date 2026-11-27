@@ -121,7 +121,6 @@ InterviewCoach/
 ├── main.py                       # FastAPI app
 ├── interview-prep-openapi.json   # contract used by Copilot Studio
 ├── requirements.txt
-├── ROADMAP.md                    # plan, progress log, step-by-step notes
 ├── src/interviewcoach/
 │   ├── models/                   # request models
 │   └── services/                 # questions, skill gap, study plan, knowledge
@@ -165,10 +164,10 @@ Swagger UI: `http://localhost:8000/docs`
 | Done | Next |
 |---|---|
 | Backend on Azure with CI/CD | Publish the agent + Teams test chat |
-| Save sessions + error logging | Behavioral role (knowledge files only) |
-| Power BI report | Update `architecture.md`, screenshots, demo video |
+| Save sessions + error logging | Update `architecture.md` |
+| Power BI report | Screenshots, demo video |
+| Behavioral role — new role = new knowledge file, zero code | |
 
-Full plan and progress log: [`ROADMAP.md`](ROADMAP.md)
 
 ---
 
