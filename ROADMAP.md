@@ -20,7 +20,7 @@ Only facts from those sources. "Suggested" items are new.
 | — | Code review: 8 bugs + 6 missing items found | ✅ Done | 12 Aug — SESSION_SUMMARY.md |
 | — | 10 bugs fixed, 22 tests, CI runs pytest | ✅ Done | 18 Aug — commit "fix: all bugs fixed..." |
 | — | README expanded | ✅ Done | 23 Sep — GitHub only (not pulled locally) |
-| 8 | Microsoft Teams deployment | ❌ Not done | Notes disagree: "one publish step" vs "needs Copilot Studio licence" |
+| 8 | Microsoft Teams deployment | ❌ Not done yet | No licence block (answered 26 Nov) — publish + Teams test chat still to do |
 | 9 | Update architecture.md | ❌ Not done | listed as pending |
 | 10 | Portfolio packaging (README, screenshots, demo video) | ⚠️ Partly | README done; screenshots exist locally only; no video |
 | — | Knowledge for python / data-engineer / behavioral | ❌ Empty folders | still empty 26 Nov |
@@ -38,7 +38,7 @@ Only facts from those sources. "Suggested" items are new.
 |---|---|---|---|
 | 1 | ✅ **DONE 26 Nov** — Git sync: `git pull` + `.gitattributes` (`* text=auto`) | clean start | `git status` shows nothing |
 | 2 | ⚠️ **MOSTLY DONE 26 Nov** — Cleanup: verify which OpenAPI file Copilot Studio uses, remove unused ones, replace fake `.docx`. Left: `interviewcoach-minimal.json` (Test tool still uses it) + upload the real .docx to SharePoint | less confusion; SharePoint needs real DOCX | verified + 1 contract left + real .docx uploaded |
-| 3 | 🚫 **BLOCKED 26 Nov** — Phase 8 check: Teams or demo website channel. Agent will not open (see Progress log) | 5-min task, settles the licence question | 1 test chat works |
+| 3 | ✅ **ANSWERED 26 Nov** — Phase 8 check: Teams is available, no licence needed. Agent opens in Classic experience. Publish + test chat still to do | 5-min task, settles the licence question | 1 test chat works |
 | 4 | **Architecture hardening** — see 4a–4d (order: evidence first, then schema) | protect the design before the first data is stored | all parts done, tests pass |
 | 4a | ✅ **DONE 26 Nov** — Knowledge contract: every **active** role folder (has at least 1 `.md` file) must have a `## Core Skills` section + a test that checks them. Empty placeholder folders are skipped until filled | makes "new role = new files" a checked rule, without breaking CI on empty folders | test passes now; fails if an active role breaks the rule |
 | 4b | ✅ **DONE 26 Nov** — **Scoring proof** — run 1 real question, answer it, get: score 1–5, **at least 1 strength, at least 1 weakness, max 3 feedback points** | nothing makes a score today; the schema must come from real output; fixed limits = clean Power BI data | 1 real scored answer saved as an example |
@@ -46,7 +46,7 @@ Only facts from those sources. "Suggested" items are new.
 | 4d | ✅ Decided 26 Nov: **option A** (Power Automate saves directly) | the design depends on it | done |
 | 5 | ✅ **DONE 26 Nov** — Azure App Service instead of ngrok | stable URL before anything depends on it | agent works with your PC off |
 | 6 | ✅ **DONE 27 Nov** — Phase 11: save sessions (SharePoint list first, Dataverse later). **If the save fails:** interview continues, error is logged (flow "run after: failed" branch → `SessionErrors` list), flow run history shows details | Gap #3; resilience + demo/interview talking point | 3 real sessions saved + 1 forced failure logged |
-| 7 | Phase 12: Power BI — sessions done, average score, weakest skills, progress over time | Gap #3 | report runs, you can demo it |
+| 7 | ✅ **DONE 27 Nov** — Phase 12: Power BI — sessions done, average score, weakest skills, progress over time (`powerbi/InterviewCoach.pbix`) | Gap #3 | report runs, you can demo it |
 | 8 | Behavioral role — knowledge files only | proves the rule | works with **zero** Python changes. If code changes seem needed → find out why the role breaks the knowledge contract (4a) |
 | 9 | Update `architecture.md` | Phase 9 | diagram matches the code |
 | 10 | Packaging: screenshots, 2-min video, README | Phase 10 | README shows flow + report |
@@ -76,6 +76,209 @@ Only facts from those sources. "Suggested" items are new.
 **v2 (what changed from v1):**
 - Accepted: architecture step before saving data; stable session schema; knowledge contract; Azure before Phase 11; Phase 8 moved early; fix fake .docx; no Observer.
 - Changed: Strategy/Factory put on hold (code is already data-driven); `SessionStore` only if Python does the saving; added the missing **scoring step**.
+
+## Part D — Steps 5–6 in simple words (no code, only Microsoft websites)
+
+### 1. The 4 places
+
+They are all Microsoft websites. One login: zealand.dk. Not 4 separate systems.
+
+- **Copilot Studio = the Agent / the Boss**
+  It talks to you. It asks the question. It gives the score.
+  It can decide, but it cannot write anything down.
+
+- **Power Automate = the Helper**
+  It does the same steps every time.
+  It is the hands. It writes for the boss.
+
+- **SharePoint = the Notebook**
+  It is just a list. Like a table in Excel, but in the cloud.
+  This is where the notes live.
+
+- **Azure = the Computer in the Cloud**
+  It runs my Python code.
+  Before, the code ran on my PC (ngrok). Now it runs here, so my PC can be off.
+
+### 2. Why do we need all of them?
+
+The Agent can talk and score, but it **cannot write a row in a table on its own.**
+
+> **Agent decides → Helper does → Notebook keeps.**
+
+Agent says: *"Save this score."*
+Helper writes it.
+Notebook keeps it.
+
+Without the Helper, the score is said once in the chat and then lost.
+
+### 3. How are they linked?
+
+**Agent → Helper**
+The flow starts with *"When an agent calls the flow"* and ends with *"Respond to the agent"*.
+That is how the boss calls the helper, and how the helper answers back.
+
+**Helper → Notebook**
+The flow action is *"Create item"*.
+Create item = write one new row in the list `PracticeSessions`.
+
+**Agent → Computer in the Cloud**
+The link is called a *custom connector*.
+Its **Host** is just my Azure URL = the address of the computer.
+
+---
+
+### 4. What I did, in order — practical clicks
+
+#### Part A — Move the code to the Computer in the Cloud (step 5)
+
+1. **Azure portal → Subscriptions**
+   Checked: *Azure for Students*, Active, I am Owner.
+
+2. **Azure → Create → Web App**
+   - Name: `interviewcoach-bilal`
+   - Code, **Python 3.12**, **Linux**, **Sweden Central**
+   - Plan: the free one (**F1**), shared with an older app
+   - Folder (resource group): `rg-interviewcoach`
+
+3. **Web App → Configuration → Stack settings → Startup command**
+   ```
+   python -m uvicorn main:app --host 0.0.0.0 --port 8000
+   ```
+   = "how to start my app". `main:app` = the `app` in `main.py`.
+
+4. **Web App → Deployment Center → GitHub**
+   - Repo `InterviewCoach`, branch `master`
+   - Azure added a file `.github/workflows/...yml` to my repo → I did `git pull`.
+   - Now every `git push` = new version on Azure automatically.
+   - First run failed: *"No subscriptions found"* → clicked **Re-run failed jobs** → OK.
+
+5. **Browser test**
+   Opened `<Azure URL>/api-info` → got `{"status": "ready"}` ✅
+
+6. **My code (I did it myself)**
+   Changed the URL from ngrok to Azure in 3 files. Tests: `python -m pytest` → 23 passed. Pushed.
+
+7. **Power Automate → Custom connectors → InterviewCoach → Edit**
+   - Changed **Host** to the Azure host → Update → **Test** → **200** ✅
+
+8. **Copilot Studio → the agent**
+   It asked to reconnect → *Open connection manager* → InterviewCoach → **Connect**.
+
+9. **Final test**
+   ngrok **off**, PC code **off** → asked the agent for a plan → full 7-day plan ✅
+
+#### Part B — Make the Notebook (SharePoint)
+
+10. **SharePoint → site Learning Copilot → New → List → Blank list** → name `PracticeSessions`
+11. **Add columns:**
+    - `Title` (already there) = the question
+    - `Role` = single line of text
+    - `Score` = number
+    - `Strengths` = multiple lines of text
+    - `Weaknesses` = multiple lines of text
+    - `Created` = automatic date (already there)
+
+#### Part C — Make the Helper (Power Automate)
+
+12. **Copilot Studio** → open the agent (classic experience) → **Tools → + Add a tool → Agent flow**
+    → this opens the Power Automate editor.
+    *(Agent flow, not the plain SharePoint tool — a flow can also have a "what if it fails" path.)*
+
+13. **First box: "When an agent calls the flow"** → add 5 inputs:
+    | Input | Type |
+    |---|---|
+    | Question | Text |
+    | Role | Text |
+    | Score | Number |
+    | Strengths | Text |
+    | Weaknesses | Text |
+    = the empty fields on the form the boss fills in.
+
+14. **+ New step → SharePoint → Create item**
+    - Site: **Learning Copilot**
+    - List: **PracticeSessions**
+    - Fill each column with the ⚡ input of the same name:
+      Title ← Question, Role ← Role, Score ← Score, Strengths ← Strengths, Weaknesses ← Weaknesses
+
+15. **+ New step → Respond to the agent**
+    = the helper says "done" back to the boss.
+
+16. Name the flow **Save Practice Session** + short description → **Save draft** → **Publish**.
+
+#### Part D — Tell the Boss to use the Helper (Copilot Studio)
+
+17. **Agent → Tools → Add a tool → Flow → Save Practice Session → Add and configure**
+
+18. **Tool description** (the boss reads this to know WHEN to use it):
+    *"Call once after you score an answer in practice mode. Never in plan mode."*
+
+19. **Each input → Customize** → give a real name + a description.
+    Without this the AI only sees "Text 1, Text 2" and puts the wrong values in.
+
+20. **Completion → Don't respond** (the user already got the score in the chat).
+
+21. **Instructions → MODE 2 (practice)**
+    - Old line: "do NOT call any tool" → that **blocked** the save.
+    - New line: "do NOT call the *Generate interview preparation plan* tool".
+    - Added: "After the score, call *Save Practice Session* once. Tell the user only if it fails."
+
+22. **Test:** answered a practice question → score 4/5 → **new row in PracticeSessions** ✅
+
+#### Part E — What if writing fails? (second notebook)
+
+23. **SharePoint → new list `SessionErrors`**
+    - `Title` = the question
+    - `ErrorDetails` = multiple lines of text
+
+24. **Power Automate → open Save Practice Session → + New step → Create item** (it is called *Create item 1*)
+    - List: **SessionErrors**
+    - **… → Settings → Run after** → tick only **has failed** + **has timed out**
+    = "only write here if the first write broke".
+
+25. **Respond to the agent → Run after** → tick **is successful** + **is skipped**
+    = the boss always gets an answer.
+    (When all is OK, the error step is *skipped* → without "is skipped" the boss would wait forever.)
+
+26. **Break it on purpose** — manual flow test with a **298-letter** question (the notebook Title takes max **255**):
+    - Run 1: the error write **also** failed (same too-long Title)
+      → fix in Create item 1, Title = **fx** `take(triggerBody()?['text'], 250)` = first 250 letters.
+    - Run 2: error row was there, but **ErrorDetails was empty**
+      → fix, ErrorDetails = **fx** `string(actions('Create_item')?['error'])` = the error of the first step, as text.
+    - Run 3: flow OK, error row with the full error ✅
+
+27. **Main Create item** → Title also = **fx** `take(triggerBody()?['text'], 255)`
+    → long real questions are cut and still saved.
+
+28. **3 real sessions** through the agent (2× ai-engineer, 1× data-engineer) → all 3 rows saved ✅ = step 6 done.
+
+> ⚠️ Formulas must show as a **purple fx pill**. Typed as plain text = saved as words, not calculated.
+
+---
+
+### 5. What if it fails?
+
+If the Helper cannot write in the first notebook, it writes in the second notebook, `SessionErrors`.
+
+The interview does **not** stop. The Agent still talks to you.
+
+That is why I tested the fail on purpose — and found 2 bugs that the normal test never shows.
+
+### 6. The order to use next time
+
+1. **Notebook first** (SharePoint list) — decide the columns from 1 real output.
+2. **Computer in the cloud** (Azure) — if there is code the agent calls.
+3. **Helper** (Power Automate flow) — inputs → Create item → Respond to the agent → Publish.
+4. **Tell the boss** (Copilot Studio) — add tool, describe it + every input, fix the Instructions.
+5. **Test** — 1 real row.
+6. **Second notebook + fail path** — run after: has failed.
+7. **Break it on purpose** — test, fix, test again.
+8. **Clean the data** — then Power BI.
+
+Why this order: each step needs the one before. The helper cannot pick a notebook that does not exist. The boss cannot call a helper that is not published.
+
+### In one sentence
+
+> **First the notebook (SharePoint), then the helper (Power Automate), then you tell the boss (Agent) to use the helper.**
 
 ## Progress log (newest at the bottom — check here what was done)
 
@@ -137,9 +340,35 @@ Only facts from those sources. "Suggested" items are new.
   - 3 real practice sessions through the agent, all saved in `PracticeSessions`: 2× ai-engineer (production RAG design / RAG design + evaluation), 1× data-engineer (reliable ETL pipeline), all score 4. Plus 1 forced failure logged in `SessionErrors` = done criterion met.
   - Noticed: the strengths/weaknesses saved are the AI's own short rewording of the chat text (not word for word). Fine for Power BI.
 
-### ▶ RESUME HERE (27 Nov, 09:55)
-- Next: **step 7** — Power BI report on `PracticeSessions`: sessions done, average score, weakest skills, progress over time.
-- Before Power BI: same Role spelling (row 1 says "Junior AI Engineer", others "ai-engineer") — fix row 1 by hand or filter it out.
+### 27 Nov 2026 (10:15)
+- **Docs:** added **Part D** — steps 5–6 in simple words (boss / helper / notebook), with every practical click in order, the fail path, and the order to use next time. Text only (Claude).
+
+### 27 Nov 2026 (11:02)
+- **Data cleaned:** row 1 in `PracticeSessions` Role changed "Junior AI Engineer" → `ai-engineer` (by Bilal). All 4 rows now use `ai-engineer` / `data-engineer`. Ready for Power BI.
+- **Roadmap:** 2 stale lines fixed (Part A row 8, Part C step 3) — no longer say "blocked" / "notes disagree".
+
+### 27 Nov 2026 (11:45) — Step 7 started (Power BI)
+- **Connected:** Power BI Desktop → Get data → More… → **SharePoint Online List** → site `https://zealanddk.sharepoint.com/sites/LearningCopilot` (cut off `/SitePages/...`) → implementation **2.0** → sign in with **Microsoft account** → Navigator → tick **PracticeSessions** → **Transform Data**.
+- **Cleaned in Power Query:** Choose Columns → kept only Title, Role, Score, Strengths, Weaknesses, Created. Score type **ABC → Whole Number (123)** so it can be averaged. Close & Apply.
+  - Mistake + lesson: first changed **Role** to a number by accident → Role became errors → removed that step. "Remove Errors" deletes whole **rows** — check the row count after.
+- **Card 1 — Sessions done = 4:** Card visual → Title in **Value** (not Categories) → ⌄ → **Count** (not Count Distinct).
+- Saved: `powerbi/InterviewCoach.pbix`.
+
+### 27 Nov 2026 (13:15) — Step 7: all 4 visuals built
+- **Card 2 — Average score = 4,00:** Card → drag Score into **Value** → ⌄ → **Average** (default was Sum = 16).
+- **Weakest skills (2 visuals):** Weaknesses is free text → Power BI cannot count it. So: (a) **Clustered bar chart** Role (Y-axis) × Average of Score (X-axis) → shortest bar = weakest role; (b) **Table** Role + Weaknesses → read what to improve.
+- **Progress over time:** **Line chart** Created (X-axis) × Average of Score (Y-axis). X-axis ⌄ → **Created** instead of *Date Hierarchy* (otherwise "by Year" = 1 dot). Flat line at 4 today — it moves when more sessions are saved.
+- Lesson: Power BI guesses the summary (Sum, First, Date Hierarchy). Always check the ⌄ menu.
+
+### 27 Nov 2026 (13:20) — Step 7 ✅ DONE
+- **Refresh test (end-to-end):** practice question in the agent (data-engineer, weak answer on purpose) → **score 2/5** → flow saved row 5 in `PracticeSessions` → Power BI **Home → Refresh** → all visuals changed as predicted: Sessions **4 → 5**, Average **4,00 → 3,60**, data-engineer bar **4 → 3**, line chart drops, new weakness in the table.
+- Proves the whole chain: **Agent (boss) → Flow (helper) → SharePoint (notebook) → Power BI (charts)**.
+- Page laid out: 2 cards left, bar chart middle, line chart + weaknesses table right.
+- Known: data refreshes only when **Refresh** is clicked (Desktop). Auto refresh needs Publish to Power BI Service — later, optional.
+- Seen again: run-together lines in the agent's score reply (open item).
+
+### ▶ RESUME HERE (27 Nov, 13:20)
+- Next: **step 8** — Behavioral role, knowledge files only (zero Python changes). Or first clear the open items below.
 - Still open: run-together lines in the score reply; remove the **Test** tool + `interviewcoach-minimal.json`; real .docx in SharePoint (check); **publish** agent + Teams test chat.
 
 ## Rules kept from earlier sessions
